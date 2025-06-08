@@ -6,7 +6,7 @@ This script automates the installation of [Cursor AI Editor](https://www.cursor.
 
 ```bash
 # Download the script
-wget https://raw.githubusercontent.com/your-username/cursor-crostini-installer/main/install-cursor-crostini.sh
+wget https://raw.githubusercontent.com/cartpauj/cursor-crostini-chromebook-install-script/main/install-cursor-crostini.sh
 
 # Make it executable
 chmod +x install-cursor-crostini.sh
@@ -17,7 +17,7 @@ chmod +x install-cursor-crostini.sh
 
 ### One-liner Installation
 ```bash
-curl -fsSL https://raw.githubusercontent.com/your-username/cursor-crostini-installer/main/install-cursor-crostini.sh | bash
+curl -fsSL https://raw.githubusercontent.com/cartpauj/cursor-crostini-chromebook-install-script/main/install-cursor-crostini.sh | bash
 ```
 
 ## 📋 Prerequisites
