@@ -260,7 +260,5 @@ main() {
     show_completion
 }
 
-# Check if script is being run directly
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main "$@"
-fi
+# Run the main function
+main "$@"
