@@ -167,7 +167,31 @@ The script always downloads the latest version available.
 
 ## 🗑️ Uninstalling
 
-To completely remove Cursor:
+### Quick Uninstall
+```bash
+# Download the uninstall script
+wget https://raw.githubusercontent.com/cartpauj/cursor-crostini-chromebook-install-script/main/uninstall-cursor-crostini.sh
+
+# Make it executable
+chmod +x uninstall-cursor-crostini.sh
+
+# Run the uninstaller
+./uninstall-cursor-crostini.sh
+```
+
+### One-liner Uninstallation
+```bash
+curl -fsSL https://raw.githubusercontent.com/cartpauj/cursor-crostini-chromebook-install-script/main/uninstall-cursor-crostini.sh | bash
+```
+
+The uninstall script will:
+- Remove the Cursor AppImage from `/opt/cursor.AppImage`
+- Remove the desktop entry and icon
+- Optionally remove user settings and data (with confirmation)
+- Verify complete removal
+
+### Manual Uninstallation
+If you prefer to uninstall manually:
 
 ```bash
 # Remove the application
@@ -179,6 +203,10 @@ rm -f ~/.local/share/icons/cursor.png
 
 # Update desktop database
 update-desktop-database ~/.local/share/applications
+
+# Optionally remove user data
+rm -rf ~/.config/cursor
+rm -rf ~/.cache/cursor
 ```
 
 ## 📝 Script Features
