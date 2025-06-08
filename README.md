@@ -197,7 +197,7 @@ Feel free to submit issues or improvements to this installation script. The scri
 
 ## 📄 License
 
-This installation script is provided under the MIT License. Cursor AI Editor itself is proprietary software by Anysphere Inc.
+This installation script is provided under the GPL v3 or later license. Cursor AI Editor itself is proprietary software by Anysphere Inc.
 
 ## ⚠️ Disclaimer
 
