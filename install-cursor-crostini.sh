@@ -64,25 +64,23 @@ install_dependencies() {
 get_latest_cursor_url() {
     print_status "Fetching latest Cursor version info..."
     
-    local latest_info
-    latest_info=$(curl -s "https://download.todesktop.com/230313mzl4w4u92/latest-linux.yml")
+    # Get the latest version info from Cursor's official download API
+    local download_info
+    download_info=$(curl -s "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable")
     
-    if [[ -z "$latest_info" ]]; then
-        print_error "Failed to fetch latest version information"
+    if [[ -z "$download_info" ]]; then
+        print_error "Failed to fetch latest version information from Cursor API"
         exit 1
     fi
     
-    # Extract the AppImage filename from the YAML
-    local appimage_name
-    appimage_name=$(echo "$latest_info" | grep -E "cursor-.*-x86_64\.AppImage" | head -1 | awk '{print $3}')
+    # Parse the version and download URL
+    CURSOR_VERSION=$(echo "$download_info" | grep -o '"version":"[^"]*"' | cut -d'"' -f4)
+    CURSOR_URL=$(echo "$download_info" | grep -o '"downloadUrl":"[^"]*"' | cut -d'"' -f4)
     
-    if [[ -z "$appimage_name" ]]; then
-        print_error "Could not parse AppImage filename from version info"
+    if [[ -z "$CURSOR_VERSION" ]] || [[ -z "$CURSOR_URL" ]]; then
+        print_error "Failed to parse version information from API response"
         exit 1
     fi
-    
-    CURSOR_URL="https://download.todesktop.com/230313mzl4w4u92/$appimage_name"
-    CURSOR_VERSION=$(echo "$appimage_name" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
     
     print_success "Found Cursor version: $CURSOR_VERSION"
 }
@@ -109,15 +107,19 @@ download_cursor() {
     TEMP_APPIMAGE="$temp_file"
 }
 
-# Function to install Cursor system-wide
+# Function to install Cursor to user directory
 install_cursor() {
-    print_status "Installing Cursor to /opt/cursor.AppImage..."
+    print_status "Installing Cursor to ~/.local/bin/cursor.AppImage..."
     
-    # Move to system location and make executable
-    sudo mv "$TEMP_APPIMAGE" /opt/cursor.AppImage
-    sudo chmod +x /opt/cursor.AppImage
+    # Create user bin directory
+    mkdir -p "$HOME/.local/bin"
     
-    print_success "Cursor installed to /opt/cursor.AppImage"
+    # Move to user location and make executable
+    mv "$TEMP_APPIMAGE" "$HOME/.local/bin/cursor.AppImage"
+    chmod +x "$HOME/.local/bin/cursor.AppImage"
+    
+    print_success "Cursor installed to ~/.local/bin/cursor.AppImage"
+    print_success "✓ Auto-update enabled: Cursor can update itself in user directory"
 }
 
 # Function to extract and install icon
@@ -132,7 +134,7 @@ install_icon() {
     mkdir -p "$extract_dir"
     cd "$extract_dir"
     
-    /opt/cursor.AppImage --appimage-extract usr/share/icons/hicolor/128x128/apps/cursor.png >/dev/null 2>&1
+    "$HOME/.local/bin/cursor.AppImage" --appimage-extract usr/share/icons/hicolor/128x128/apps/cursor.png >/dev/null 2>&1
     
     if [[ -f "squashfs-root/usr/share/icons/hicolor/128x128/apps/cursor.png" ]]; then
         cp "squashfs-root/usr/share/icons/hicolor/128x128/apps/cursor.png" ~/.local/share/icons/cursor.png
@@ -161,7 +163,7 @@ create_desktop_entry() {
 [Desktop Entry]
 Name=Cursor
 Comment=AI-first code editor
-Exec=/opt/cursor.AppImage
+Exec=$HOME/.local/bin/cursor.AppImage
 Icon=$ICON_PATH
 Type=Application
 Categories=Development;TextEditor;
@@ -179,12 +181,12 @@ EOF
 verify_installation() {
     print_status "Verifying installation..."
     
-    if [[ ! -f /opt/cursor.AppImage ]]; then
-        print_error "Cursor AppImage not found at /opt/cursor.AppImage"
+    if [[ ! -f "$HOME/.local/bin/cursor.AppImage" ]]; then
+        print_error "Cursor AppImage not found at ~/.local/bin/cursor.AppImage"
         return 1
     fi
     
-    if [[ ! -x /opt/cursor.AppImage ]]; then
+    if [[ ! -x "$HOME/.local/bin/cursor.AppImage" ]]; then
         print_error "Cursor AppImage is not executable"
         return 1
     fi
@@ -204,12 +206,15 @@ show_completion() {
     echo
     echo -e "${GREEN}You can now:${NC}"
     echo "  • Launch Cursor from your applications menu"
-    echo "  • Run from terminal: /opt/cursor.AppImage"
+    echo "  • Run from terminal: ~/.local/bin/cursor.AppImage"
     echo "  • Find it in the 'Development' category of your app launcher"
     echo
     echo -e "${BLUE}Cursor Version:${NC} $CURSOR_VERSION"
-    echo -e "${BLUE}Installation Location:${NC} /opt/cursor.AppImage"
+    echo -e "${BLUE}Installation Location:${NC} ~/.local/bin/cursor.AppImage"
     echo -e "${BLUE}Desktop Entry:${NC} ~/.local/share/applications/cursor.desktop"
+    echo
+    print_success "✓ Auto-update enabled: Cursor can update itself automatically"
+    echo -e "${BLUE}Check for updates:${NC} Help → Check for Updates (or Ctrl+Shift+P → 'Update')"
     echo
     print_warning "Note: You may need to refresh your applications menu to see the icon"
 }
@@ -222,7 +227,7 @@ cleanup_on_error() {
     [[ -f "$TEMP_APPIMAGE" ]] && rm -f "$TEMP_APPIMAGE"
     
     # Remove partial installation
-    [[ -f /opt/cursor.AppImage ]] && sudo rm -f /opt/cursor.AppImage
+    [[ -f "$HOME/.local/bin/cursor.AppImage" ]] && rm -f "$HOME/.local/bin/cursor.AppImage"
     [[ -f ~/.local/share/applications/cursor.desktop ]] && rm -f ~/.local/share/applications/cursor.desktop
     [[ -f ~/.local/share/icons/cursor.png ]] && rm -f ~/.local/share/icons/cursor.png
     

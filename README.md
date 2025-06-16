@@ -32,7 +32,7 @@ curl -fsSL https://raw.githubusercontent.com/cartpauj/cursor-crostini-chromebook
 1. **System Check**: Verifies compatibility with Debian-based systems and x86_64 architecture
 2. **Dependencies**: Installs required packages (FUSE, libfuse2, wget, curl)
 3. **Download**: Fetches the latest Cursor AppImage from official sources
-4. **Installation**: Places Cursor in `/opt/cursor.AppImage` with proper permissions
+4. **Installation**: Places Cursor in `~/.local/bin/cursor.AppImage` with auto-update capability
 5. **Icon Setup**: Extracts and installs the official Cursor icon
 6. **Desktop Integration**: Creates a desktop entry for easy launching
 7. **Verification**: Confirms successful installation
@@ -42,12 +42,12 @@ curl -fsSL https://raw.githubusercontent.com/cartpauj/cursor-crostini-chromebook
 Once installed, you can:
 
 - **Launch from Applications Menu**: Find Cursor in the "Development" category
-- **Run from Terminal**: Execute `/opt/cursor.AppImage`
+- **Run from Terminal**: Execute `~/.local/bin/cursor.AppImage` (or add `~/.local/bin` to your PATH)
 - **Open Files**: Right-click text files and "Open with Cursor" (if configured)
 
 ## 📁 Installation Locations
 
-- **Executable**: `/opt/cursor.AppImage`
+- **Executable**: `~/.local/bin/cursor.AppImage`
 - **Desktop Entry**: `~/.local/share/applications/cursor.desktop`
 - **Icon**: `~/.local/share/icons/cursor.png`
 
@@ -66,23 +66,25 @@ sudo apt install -y fuse libfuse2 wget curl
 
 ### 2. Get Latest Version Info
 ```bash
-curl -s "https://download.todesktop.com/230313mzl4w4u92/latest-linux.yml"
+curl -s "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable"
 ```
 
 ### 3. Download Cursor
 ```bash
-wget "https://download.todesktop.com/230313mzl4w4u92/cursor-VERSION-x86_64.AppImage" -O cursor.AppImage
+# Use the downloadUrl from the API response
+wget "DOWNLOAD_URL_FROM_API" -O cursor.AppImage
 ```
 
-### 4. Install System-wide
+### 4. Install to User Directory
 ```bash
-sudo mv cursor.AppImage /opt/cursor.AppImage
-sudo chmod +x /opt/cursor.AppImage
+mkdir -p ~/.local/bin
+mv cursor.AppImage ~/.local/bin/cursor.AppImage
+chmod +x ~/.local/bin/cursor.AppImage
 ```
 
 ### 5. Extract Icon
 ```bash
-/opt/cursor.AppImage --appimage-extract usr/share/icons/hicolor/128x128/apps/cursor.png
+~/.local/bin/cursor.AppImage --appimage-extract usr/share/icons/hicolor/128x128/apps/cursor.png
 mkdir -p ~/.local/share/icons
 cp squashfs-root/usr/share/icons/hicolor/128x128/apps/cursor.png ~/.local/share/icons/cursor.png
 rm -rf squashfs-root
@@ -95,7 +97,7 @@ cat > ~/.local/share/applications/cursor.desktop << 'EOF'
 [Desktop Entry]
 Name=Cursor
 Comment=AI-first code editor
-Exec=/opt/cursor.AppImage
+Exec=/home/$(whoami)/.local/bin/cursor.AppImage
 Icon=/home/$(whoami)/.local/share/icons/cursor.png
 Type=Application
 Categories=Development;TextEditor;
@@ -124,7 +126,7 @@ sudo apt install -y fuse libfuse2
 - Check if the desktop file exists: `ls ~/.local/share/applications/cursor.desktop`
 
 **Permission denied when running AppImage**
-- Make sure the file is executable: `sudo chmod +x /opt/cursor.AppImage`
+- Make sure the file is executable: `chmod +x ~/.local/bin/cursor.AppImage`
 
 **Download fails**
 - Check your internet connection
@@ -139,31 +141,33 @@ sudo apt install -y fuse libfuse2
 If you encounter issues:
 
 1. **Check the output**: The script provides colored status messages
-2. **Verify installation**: Run `/opt/cursor.AppImage --version` to test
+2. **Verify installation**: Run `~/.local/bin/cursor.AppImage --version` to test
 3. **Manual cleanup**: If needed, remove files and try again:
    ```bash
-   sudo rm -f /opt/cursor.AppImage
+   rm -f ~/.local/bin/cursor.AppImage
    rm -f ~/.local/share/applications/cursor.desktop
    rm -f ~/.local/share/icons/cursor.png
    ```
 
 ## 🔄 Updating Cursor
 
-To update to the latest version:
+**Cursor automatically updates itself!** 
 
-1. **Remove current installation**:
-   ```bash
-   sudo rm /opt/cursor.AppImage
-   rm ~/.local/share/applications/cursor.desktop
-   rm ~/.local/share/icons/cursor.png
-   ```
+Since Cursor is installed in your user directory (`~/.local/bin/`), it can update itself without requiring scripts or sudo access.
 
-2. **Run the installer again**:
-   ```bash
-   ./install-cursor-crostini.sh
-   ```
+**To check for updates:**
+1. Open Cursor
+2. Go to **Help** → **Check for Updates**
+3. Or use **Ctrl+Shift+P** and search for "Update"
 
-The script always downloads the latest version available.
+**Manual update (if needed):**
+If auto-update doesn't work, simply reinstall:
+
+```bash
+./install-cursor-crostini.sh
+```
+
+The installer always downloads the latest version available.
 
 ## 🗑️ Uninstalling
 
@@ -185,7 +189,7 @@ curl -fsSL https://raw.githubusercontent.com/cartpauj/cursor-crostini-chromebook
 ```
 
 The uninstall script will:
-- Remove the Cursor AppImage from `/opt/cursor.AppImage`
+- Remove the Cursor AppImage from `~/.local/bin/cursor.AppImage`
 - Remove the desktop entry and icon
 - Optionally remove user settings and data (with confirmation)
 - Verify complete removal
@@ -195,7 +199,7 @@ If you prefer to uninstall manually:
 
 ```bash
 # Remove the application
-sudo rm -f /opt/cursor.AppImage
+rm -f ~/.local/bin/cursor.AppImage
 
 # Remove desktop integration
 rm -f ~/.local/share/applications/cursor.desktop
@@ -215,6 +219,7 @@ rm -rf ~/.cache/cursor
 - ✅ **System compatibility checking**
 - ✅ **Dependency management**
 - ✅ **Official icon extraction**
+- ✅ **Auto-update capability (user installation)**
 - ✅ **Error handling and cleanup**
 - ✅ **Colored output for clarity**
 - ✅ **Installation verification**

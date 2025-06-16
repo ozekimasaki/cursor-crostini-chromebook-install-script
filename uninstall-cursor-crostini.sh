@@ -35,11 +35,25 @@ print_error() {
 remove_cursor_appimage() {
     print_status "Removing Cursor AppImage..."
     
+    # Check both possible locations
+    local removed=false
+    
+    # Check user installation location
+    if [[ -f "$HOME/.local/bin/cursor.AppImage" ]]; then
+        rm -f "$HOME/.local/bin/cursor.AppImage"
+        print_success "Cursor AppImage removed from ~/.local/bin/cursor.AppImage"
+        removed=true
+    fi
+    
+    # Check legacy system installation location
     if [[ -f /opt/cursor.AppImage ]]; then
         sudo rm -f /opt/cursor.AppImage
-        print_success "Cursor AppImage removed from /opt/cursor.AppImage"
-    else
-        print_warning "Cursor AppImage not found at /opt/cursor.AppImage"
+        print_success "Legacy Cursor AppImage removed from /opt/cursor.AppImage"
+        removed=true
+    fi
+    
+    if [[ "$removed" = false ]]; then
+        print_warning "Cursor AppImage not found in any known location"
     fi
 }
 
@@ -103,8 +117,13 @@ verify_uninstallation() {
     
     local issues=0
     
+    if [[ -f "$HOME/.local/bin/cursor.AppImage" ]]; then
+        print_error "Cursor AppImage still exists at ~/.local/bin/cursor.AppImage"
+        ((issues++))
+    fi
+    
     if [[ -f /opt/cursor.AppImage ]]; then
-        print_error "Cursor AppImage still exists at /opt/cursor.AppImage"
+        print_error "Legacy Cursor AppImage still exists at /opt/cursor.AppImage"
         ((issues++))
     fi
     
@@ -133,7 +152,7 @@ show_completion() {
     print_success "🗑️  Cursor uninstallation completed!"
     echo
     echo -e "${GREEN}Removed:${NC}"
-    echo "  • Cursor AppImage (/opt/cursor.AppImage)"
+    echo "  • Cursor AppImage (~/.local/bin/cursor.AppImage or /opt/cursor.AppImage)"
     echo "  • Desktop entry (~/.local/share/applications/cursor.desktop)"
     echo "  • Application icon (~/.local/share/icons/cursor.png)"
     echo
@@ -150,8 +169,8 @@ main() {
     echo -e "${BLUE}╚══════════════════════════════════════════════════════════════╝${NC}"
     echo
     
-    # Check if Cursor is installed
-    if [[ ! -f /opt/cursor.AppImage ]] && [[ ! -f ~/.local/share/applications/cursor.desktop ]]; then
+    # Check if Cursor is installed in any location
+    if [[ ! -f "$HOME/.local/bin/cursor.AppImage" ]] && [[ ! -f /opt/cursor.AppImage ]] && [[ ! -f ~/.local/share/applications/cursor.desktop ]]; then
         print_warning "Cursor does not appear to be installed"
         echo
         read -p "Continue with cleanup anyway? (y/N): " -n 1 -r
@@ -162,10 +181,10 @@ main() {
         fi
     fi
     
-    # Check for sudo access if AppImage exists
+    # Check for sudo access if legacy system AppImage exists
     if [[ -f /opt/cursor.AppImage ]]; then
         if ! sudo -n true 2>/dev/null; then
-            print_status "This script requires sudo access to remove the system-installed AppImage"
+            print_status "This script requires sudo access to remove the legacy system-installed AppImage"
             print_status "You may be prompted for your password"
             sudo true
         fi
