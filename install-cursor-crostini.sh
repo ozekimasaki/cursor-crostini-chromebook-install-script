@@ -2,8 +2,7 @@
 
 # Cursor AI Editor Installation Script for Crostini (Chrome OS Linux)
 # This script automates the installation of Cursor text editor on Crostini
-# Author: Generated with Claude Code
-# License: MIT
+# License: GPL v3 or later
 
 set -e  # Exit on any error
 
@@ -31,6 +30,29 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Function to detect system architecture
+detect_architecture() {
+    local arch=$(uname -m)
+    
+    case "$arch" in
+        x86_64)
+            ARCH="x86_64"
+            PLATFORM="linux-x64"
+            ;;
+        aarch64|arm64)
+            ARCH="arm64"
+            PLATFORM="linux-arm64"
+            ;;
+        *)
+            print_error "Unsupported architecture: $arch"
+            print_error "This script supports x86_64 and arm64 (aarch64) architectures"
+            exit 1
+            ;;
+    esac
+    
+    print_status "Detected architecture: $ARCH"
+}
+
 # Function to check if running on supported system
 check_system() {
     print_status "Checking system compatibility..."
@@ -40,10 +62,7 @@ check_system() {
         exit 1
     fi
     
-    if [[ $(uname -m) != "x86_64" ]]; then
-        print_error "This script only supports x86_64 architecture"
-        exit 1
-    fi
+    detect_architecture
     
     print_success "System compatibility check passed"
 }
@@ -64,10 +83,11 @@ install_dependencies() {
 # Function to get the latest Cursor download URL
 get_latest_cursor_url() {
     print_status "Fetching latest Cursor version info..."
+    print_status "Platform: $PLATFORM"
     
     # Get the latest version info from Cursor's official download API
     local download_info
-    download_info=$(curl -sL "https://cursor.com/api/download?platform=linux-x64&releaseTrack=stable")
+    download_info=$(curl -sL "https://cursor.com/api/download?platform=$PLATFORM&releaseTrack=stable")
     
     if [[ -z "$download_info" ]]; then
         print_error "Failed to fetch latest version information from Cursor API"

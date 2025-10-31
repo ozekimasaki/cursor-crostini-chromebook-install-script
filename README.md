@@ -6,7 +6,7 @@ This script automates the installation of [Cursor AI Editor](https://www.cursor.
 
 ```bash
 # Download the script
-wget https://raw.githubusercontent.com/cartpauj/cursor-crostini-chromebook-install-script/main/install-cursor-crostini.sh
+wget https://raw.githubusercontent.com/ozekimasaki/cursor-crostini-chromebook-install-script/main/install-cursor-crostini.sh
 
 # Make it executable
 chmod +x install-cursor-crostini.sh
@@ -17,19 +17,19 @@ chmod +x install-cursor-crostini.sh
 
 ### One-liner Installation
 ```bash
-curl -fsSL https://raw.githubusercontent.com/cartpauj/cursor-crostini-chromebook-install-script/main/install-cursor-crostini.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ozekimasaki/cursor-crostini-chromebook-install-script/main/install-cursor-crostini.sh | bash
 ```
 
 ## 📋 Prerequisites
 
 - **Chrome OS** with Linux (Crostini) enabled
-- **x86_64 architecture** (most Chromebooks)
+- **x86_64 or arm64 (aarch64) architecture** (most Chromebooks)
 - **Internet connection** for downloading Cursor
 - **Sudo access** in your Linux container
 
 ## ✨ What This Script Does
 
-1. **System Check**: Verifies compatibility with Debian-based systems and x86_64 architecture
+1. **System Check**: Verifies compatibility with Debian-based systems and detects architecture (x86_64 or arm64)
 2. **Dependencies**: Installs required packages (FUSE, libfuse2, wget, curl)
 3. **Download**: Fetches the latest Cursor AppImage from official sources
 4. **Installation**: Places Cursor in `~/.local/bin/cursor.AppImage` with auto-update capability
@@ -66,7 +66,11 @@ sudo apt install -y fuse libfuse2 wget curl
 
 ### 2. Get Latest Version Info
 ```bash
+# For x86_64
 curl -s "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable"
+
+# For arm64
+curl -s "https://www.cursor.com/api/download?platform=linux-arm64&releaseTrack=stable"
 ```
 
 ### 3. Download Cursor
@@ -174,7 +178,7 @@ The installer always downloads the latest version available.
 ### Quick Uninstall
 ```bash
 # Download the uninstall script
-wget https://raw.githubusercontent.com/cartpauj/cursor-crostini-chromebook-install-script/main/uninstall-cursor-crostini.sh
+wget https://raw.githubusercontent.com/ozekimasaki/cursor-crostini-chromebook-install-script/main/uninstall-cursor-crostini.sh
 
 # Make it executable
 chmod +x uninstall-cursor-crostini.sh
@@ -185,7 +189,7 @@ chmod +x uninstall-cursor-crostini.sh
 
 ### One-liner Uninstallation
 ```bash
-curl -fsSL https://raw.githubusercontent.com/cartpauj/cursor-crostini-chromebook-install-script/main/uninstall-cursor-crostini.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ozekimasaki/cursor-crostini-chromebook-install-script/main/uninstall-cursor-crostini.sh | bash
 ```
 
 The uninstall script will:
@@ -215,6 +219,7 @@ rm -rf ~/.cache/cursor
 
 ## 📝 Script Features
 
+- ✅ **Automatic architecture detection** (x86_64 and arm64)
 - ✅ **Automatic latest version detection**
 - ✅ **System compatibility checking**
 - ✅ **Dependency management**

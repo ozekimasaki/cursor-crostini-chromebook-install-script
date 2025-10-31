@@ -2,8 +2,7 @@
 
 # Cursor AI Editor Uninstallation Script for Crostini (Chrome OS Linux)
 # This script removes Cursor text editor from Crostini
-# Author: Generated with Claude Code
-# License: MIT
+# License: GPL v3 or later
 
 set -e  # Exit on any error
 
